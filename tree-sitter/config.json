@@ -1,0 +1,54 @@
+{
+  "parser-directories": [
+    "/home/gmack/projects/grantmacken"
+  ],
+  "theme": {
+    "type.builtin": {
+      "color": 23,
+      "bold": true
+    },
+    "variable.parameter": {
+      "underline": true
+    },
+    "attribute": {
+      "color": 124,
+      "italic": true
+    },
+    "operator": {
+      "bold": true,
+      "color": 239
+    },
+    "keyword": 56,
+    "variable.builtin": {
+      "bold": true
+    },
+    "function.builtin": {
+      "color": 26,
+      "bold": true
+    },
+    "tag": 18,
+    "comment": {
+      "italic": true,
+      "color": 245
+    },
+    "embedded": null,
+    "string.special": 30,
+    "property": 124,
+    "punctuation.bracket": 239,
+    "punctuation.delimiter": 239,
+    "string": 28,
+    "constant": 94,
+    "constructor": 136,
+    "type": 23,
+    "constant.builtin": {
+      "color": 94,
+      "bold": true
+    },
+    "module": 136,
+    "number": {
+      "bold": true,
+      "color": 94
+    },
+    "function": 26
+  }
+}
