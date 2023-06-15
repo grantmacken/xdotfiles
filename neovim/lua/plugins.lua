@@ -11,6 +11,44 @@ return {
     end,
   },
   {
+    'akinsho/nvim-bufferline.lua',
+    event = 'VeryLazy',
+    keys = {
+      { '<leader>bp', '<Cmd>BufferLineTogglePin<CR>', desc = 'Toggle pin' },
+      { '<leader>bP', '<Cmd>BufferLineGroupClose ungrouped<CR>', desc = 'Delete non-pinned buffers' },
+    },
+    config = function()
+      require('bufferline').setup {
+        options = {
+          -- numbers = "none",
+          diagnostics = 'nvim_lsp',
+          separator_style = 'slant',
+          show_tab_indicators = true,
+          show_buffer_close_icons = false,
+          show_close_icon = true,
+        },
+      }
+    end,
+  },
+  { -- Set lualine as statusline
+    'nvim-lualine/lualine.nvim',
+    event = 'VeryLazy',
+    opts = {
+      options = {
+        globalstatus = true,
+        icons_enabled = false,
+        theme = 'catppuccin-frappe',
+        component_separators = '|',
+        section_separators = '',
+      },
+      sections = {
+        lualine_a = { 'mode' },
+        lualine_b = { 'branch' },
+      },
+    },
+  },
+
+  {
     'mrjones2014/smart-splits.nvim',
     opts = { ignored_filetypes = { 'nofile', 'quickfix', 'qf', 'prompt' }, ignored_buftypes = { 'nofile' } },
     build = './kitty/install-kittens.bash',

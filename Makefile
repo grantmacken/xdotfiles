@@ -5,13 +5,14 @@ SHELL := /bin/bash
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 MAKEFLAGS += --silent
+MAKEFLAGS += -j$(shell nproc)
 .DEFAULT_GOAL := config
 
 .PHONY: config
 config:
 	echo 'TASK: use stow to create symlinks in XDG config dir'
 	stow -v --target=$(HOME) bash
-	mkdir -p -v $(HOME)/.config/{npm,nvim,neovim,git,stylua,wezterm,kitty,yamllint,tree-sitter}
+	mkdir -p -v $(HOME)/.config/{npm,nvim,neovim,git,stylua,wezterm,kitty,yamllint,tree-sitter,erlang_ls}
 	stow -v  --target=$(HOME)/.config/npm npm
 	stow -v  --target=$(HOME)/.config/nvim nvim
 	stow -v  --target=$(HOME)/.config/neovim neovim
@@ -21,7 +22,7 @@ config:
 	stow -v  --target=$(HOME)/.config/kitty kitty
 	stow -v  --target=$(HOME)/.config/yamllint yamllint
 	stow -v  --target=$(HOME)/.config/tree-sitter tree-sitter
-
+	stow -v  --target=$(HOME)/.config/erlang_ls erlang_ls
 
 bash: 
 	if ! [ -L ~/.bashrc ] 
@@ -36,9 +37,6 @@ lazy:
 	git clone https://github.com/LazyVim/starter nvim
 	rm -rf nvim/.git
 
-packer:   
-	git clone --depth 1 https://github.com/wbthomason/packer.nvim ~/.local/share/nvim/site/pack/packer/start/packer.nvim
-
 .PHONY: clean
 clean:
 	echo 'TASK : use stow to remove symlinks'
@@ -46,3 +44,4 @@ clean:
 	rm -rf ~/.local/state/nvim
 	rm -rf ~/.local/share/nvim
 	stow -D -v -t ~/.config/nvim nvim
+

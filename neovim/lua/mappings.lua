@@ -38,4 +38,4 @@ km('n', '[t', function()
   vim.cmd.tabprevious()
 end, { desc = 'Previous tab' })
 
-require('my.util').my_terms
+require 'my.util'

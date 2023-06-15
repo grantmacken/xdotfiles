@@ -17,6 +17,14 @@ if [[ ! "$PATH" == *${CARGO_BIN}* ]]; then
   export PATH="$PATH:${CARGO_BIN}"
 fi
 
+CARGO_BIN=$HOME/.cargo/bin
+if [[ ! "$PATH" == *${CARGO_BIN}* ]]; then
+  export PATH="$PATH:${CARGO_BIN}"
+fi
+
+export ASDF_BIN=$HOME/.asdf/asdf.sh
+source $ASDF_BIN
+
 #export VISUAL="nvr -cc split --remote-wait +'set bufhidden=wipe'"
 # export VISUAL='nvr --remote-wait-silent'
 export EDITOR=nvim

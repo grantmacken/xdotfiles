@@ -27,6 +27,9 @@ return {
   opts = {
     highlight = {
       enable = true,
+      custom_captures = {
+        ['declaration'] = 'Identifier',
+      },
       additional_vim_regex_highlighting = false,
     },
     --indent = { enable = true },

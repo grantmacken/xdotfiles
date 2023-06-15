@@ -33,6 +33,9 @@ configs.setup({
   highlight = {
     enable = true, -- false will disable the whole extension
     additional_vim_regex_highlighting = false,
+    custom_captures = {
+      ["declaration"] = "Identifier",
+    },
   },
   incremental_selection = {
     enable = true,
