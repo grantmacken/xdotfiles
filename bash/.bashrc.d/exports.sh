@@ -1,32 +1,28 @@
 #!/bin/bash
 GIT_USER="$( git config --get user.name )"
-
+export GIT_USER
+TERM=xterm-kitty
+export TERM
+NVIM_APPNAME=nvim
+export NVIM_APPNAME
 alias dotfiles-reload='source $HOME/.bashrc'
 alias fold="fold -s"
 #alias docker=podman
 #alias mk="make --no-builtin-rules --warn-undefined-variables --silent --no-print-directory"
-export ERL_AFLAGS="+pc unicode -kernel shell_history enabled"
+#export ERL_AFLAGS="+pc unicode -kernel shell_history enabled"
 
-REBAR_BIN=$HOME/.cache/rebar3/bin
-if [[ ! "$PATH" == *${REBAR_BIN}* ]]; then
-  export PATH="$PATH:${REBAR_BIN}"
-fi
+# REBAR_BIN=$HOME/.cache/rebar3/bin
+# if [[ ! "$PATH" == *${REBAR_BIN}* ]]; then
+#  export PATH="$PATH:${REBAR_BIN}"
+#fi
 
-CARGO_BIN=$HOME/.cargo/bin
-if [[ ! "$PATH" == *${CARGO_BIN}* ]]; then
-  export PATH="$PATH:${CARGO_BIN}"
-fi
+#CARGO_BIN=$HOME/.cargo/bin
+#if [[ ! "$PATH" == *${CARGO_BIN}* ]]; then
+#  export PATH="$PATH:${CARGO_BIN}"
+# fi
 
-CARGO_BIN=$HOME/.cargo/bin
-if [[ ! "$PATH" == *${CARGO_BIN}* ]]; then
-  export PATH="$PATH:${CARGO_BIN}"
-fi
 
-export ASDF_BIN=$HOME/.asdf/asdf.sh
-source $ASDF_BIN
 
-#export VISUAL="nvr -cc split --remote-wait +'set bufhidden=wipe'"
-# export VISUAL='nvr --remote-wait-silent'
 export EDITOR=nvim
 if [ ! -w ${XDG_RUNTIME_DIR:="/run/user/$UID"} ]; then
     echo "\$XDG_RUNTIME_DIR ($XDG_RUNTIME_DIR) not writable. Setting to /tmp." >&2
@@ -45,13 +41,25 @@ if [[ ! "$PATH" == *${NPM_BIN}* ]]; then
 fi
 NPM_CONFIG_PREFIX=$HOME/.local/npm/bin
 
-
 # make sure we have a local bin on path
+#
 LOCAL_BIN=/usr/local/bin
 if [[ ! "$PATH" == *${LOCAL_BIN}* ]]; then
   export PATH="$PATH:${LOCAL_BIN}"
 fi
-export PATH=$PATH:$(go env GOPATH)/bin
+
+GOLANG_BIN=/usr/local/go/bin
+if [[ ! "$PATH" == *${GOLANG_BIN}* ]]; then
+  export PATH="$PATH:${GOLANG_BIN}"
+fi
+
+if which go &>/dev/null
+then
+  GOPATH_BIN=$(go env GOPATH)/bin
+  if [[ ! "$PATH" == *${GOPATH_BIN}* ]]; then
+    export PATH="$PATH:${GOPATH_BIN}"
+  fi
+fi
 
 # export GOPATH=$HOME/go
 # git controlled project development
@@ -65,7 +73,7 @@ if [ -n "${GIT_USER}" ]; then
 #
 # NODE_BIN=${PROJECTS}/node_modules/.bin
 # if [[ ! "$PATH" == *${NODE_BIN}* ]]; then
-#   export PATH="$PATH:${NODE_BIN}"
+#   export PATH="$PATH:${NODE_BIN}"
 # fi
 
   #LEDGER_FILE=${PROJECTS}/accounts/main.ledger

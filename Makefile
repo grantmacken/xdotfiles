@@ -10,38 +10,42 @@ MAKEFLAGS += -j$(shell nproc)
 
 .PHONY: config
 config:
+	# sudo dnf install stow -y
 	echo 'TASK: use stow to create symlinks in XDG config dir'
-	stow -v --target=$(HOME) bash
-	mkdir -p -v $(HOME)/.config/{npm,nvim,neovim,git,stylua,wezterm,kitty,yamllint,tree-sitter,erlang_ls}
-	stow -v  --target=$(HOME)/.config/npm npm
+	mkdir -p -v $(HOME)/.config/{npm,nvim,git,kitty}
+	#stow -v  --target=$(HOME)/.config/nvim nvim
 	stow -v  --target=$(HOME)/.config/nvim nvim
-	stow -v  --target=$(HOME)/.config/neovim neovim
 	stow -v  --target=$(HOME)/.config/git git
-	stow -v  --target=$(HOME)/.config/stylua stylua
-	stow -v  --target=$(HOME)/.config/wezterm wezterm
+	#stow -v  --target=$(HOME)/.config/stylua stylua
+	#stow -v  --target=$(HOME)/.config/wezterm wezterm
 	stow -v  --target=$(HOME)/.config/kitty kitty
-	stow -v  --target=$(HOME)/.config/yamllint yamllint
-	stow -v  --target=$(HOME)/.config/tree-sitter tree-sitter
-	stow -v  --target=$(HOME)/.config/erlang_ls erlang_ls
-
-bash: 
-	if ! [ -L ~/.bashrc ] 
-	then
-	rm -fv ~/.bashrc
-	ln -s .bashrc ~/
-	fi
-	mkdir -p ~/.bashrc.d
-	stow -v  --dotfiles -t ~/ .bashrc.d
-
-lazy:
-	git clone https://github.com/LazyVim/starter nvim
-	rm -rf nvim/.git
+	#stow -v  --target=$(HOME)/.config/yamllint yamllint
+	#stow -v  --target=$(HOME)/.config/tree-sitter tree-sitter
+	#stow -v  --target=$(HOME)/.config/erlang_ls erlang_ls
 
 .PHONY: clean
 clean:
 	echo 'TASK : use stow to remove symlinks'
-	# rm -rf ~/.config/nvim
-	rm -rf ~/.local/state/nvim
-	rm -rf ~/.local/share/nvim
-	stow -D -v -t ~/.config/nvim nvim
+	rm -rfv ~/.config/neovim
+	rm -rfv ~/.local/state/neovim
+	rm -rfv ~/.local/share/neovim
+	stow -D -v -t ~/.config/neovim neovim
+	
+
+
+.PHONY: bash
+bash: 
+	echo 'TASK: bring bash under git control'
+	cd bash
+	stow -v --target=$(HOME) .
+	cd ../
+
+lazy:
+	nvim --headless "+Lazy! sync" +qa
+
+
+fonts:
+	mkdir -p ~/.local/share/fonts/BlexMono
+	#fc-cache -f -v
+	fc-list
 

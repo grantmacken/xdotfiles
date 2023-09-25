@@ -5,7 +5,6 @@ return {
     autoload = true,
     allowed_dirs = {
       '~/projects/grantmacken/dotfiles',
-      '~/projects/grantmacken/tree-sitter-xquery',
     },
   },
   config = true,

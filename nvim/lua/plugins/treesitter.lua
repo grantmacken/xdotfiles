@@ -43,7 +43,11 @@ return {
       'lua',
       'query',
       'regex',
-      'yaml',
+      'go',
+      "go",
+      "gomod",
+      "gowork",
+      "gosum",
     },
     playground = {
       enable = true,
