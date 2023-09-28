@@ -1,11 +1,13 @@
 local opt = vim.opt
+-- completions
+opt.completeopt = 'menu,menuone,noselect'
+opt.shortmess:append { s = true, W = true, I = true, c = true }
 
 opt.autowrite = true -- Enable auto write
 opt.backspace:append { 'nostop' } -- Don't stop backspace at insert
 opt.breakindent = true -- Wrap indent to match  line start
 opt.clipboard = 'unnamedplus' -- Sync with system clipboard
 opt.cmdheight = 0 -- hide command line unless needed
-opt.completeopt = 'menu,menuone,noselect'
 opt.conceallevel = 3 -- Hide * markup for bold and italic
 opt.confirm = true -- Confirm to save changes before exiting modified buffer
 opt.copyindent = true -- Copy the previous indentation on autoindenting
@@ -33,7 +35,6 @@ opt.scrolloff = 4 -- Lines of context
 opt.sessionoptions = { 'buffers', 'curdir', 'tabpages', 'winsize' }
 opt.shiftround = true -- Round indent
 opt.shiftwidth = 2 -- Size of an indent
-opt.shortmess:append { s = true, W = true, I = true, c = true }
 opt.showmode = false -- Dont show mode since we have a statusline
 opt.showtabline = 2 -- always display tabline
 opt.sidescrolloff = 8 -- Columns of context

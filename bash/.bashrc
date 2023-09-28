@@ -24,6 +24,8 @@ if [ -d ~/.bashrc.d ]; then
 	done
 fi
 
+test -r /home/gmack/.opam/opam-init/init.sh && . /home/gmack/.opam/opam-init/init.sh > /dev/null 2> /dev/null || true
+
 unset rc
 
 # gcloud

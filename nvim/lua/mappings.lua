@@ -10,7 +10,6 @@
 vim.cmd [[ command! W  execute ':w' ]] -- map :W to :w (helps which-key issue)
 local km = vim.keymap.set
 km('n', ' ', '<Nop>', { silent = true, remap = false })
-vim.g.mapleader = ' '
 km('n', '<leader>cm', '<cmd>Mason<cr>', { desc = 'Mason' })
 km('n', '<F10>', '<cmd>:TSNodeUnderCursor<cr>', { desc = 'TS node under curser' })
 km('n', '<F11>', '<cmd>TSHighlightCapturesUnderCursor<cr>', { desc = 'TS captures under curser' })

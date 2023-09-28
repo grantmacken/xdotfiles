@@ -82,28 +82,107 @@ autocmd("VimLeavePre", {
 })
 
 
+-- autocmd("FileType", {
+--   desc = "golang language server",
+--   group = augroup("gopls"),
+--   pattern = "go",
+--   callback = function()
+--     local root_dir = vim.fs.dirname(
+--     vim.fs.find({ 'go.mod', 'go.work', '.git' }, { upward = true })[1]
+--     )
+--     local client = vim.lsp.start({
+--             name = 'gopls',
+--             cmd = { 'gopls' },
+--             root_dir = root_dir,
+--         })
+--     vim.lsp.buf_attach_client(0, client)
+--     vim.notify('gopls attached' )
+--   end,
+-- })
+
+autocmd("FileType", {
+  desc = "lua language server",
+  group = augroup("lua_ls"),
+  pattern = "lua",
+  callback = function()
+    local runtime_path = vim.split(package.path, ";")
+    table.insert(runtime_path, "lua/?.lua")
+    table.insert(runtime_path, "lua/?/init.lua")
+    local root_dir = vim.fs.dirname(vim.fs.find({ 'Makefile', '.git' }, { upward = true })[1])
+    local client = vim.lsp.start({
+      name = 'lua_ls',
+      cmd = { 'lua-language-server' },
+      root_dir = root_dir,
+      -- workspace_folders = nil,
+      -- before_init(initialize_params, config) 
+      -- on_init(client, initialize_result)
+      on_init = function(_, _)
+        vim.notify( 'Init lua-language-server' )
+      end,
+      -- on_exit(code, signal, client_id)
+      -- on_attach (client, bufnr )
+      -- handlers = {}
+      -- get_language_id
+      -- offset_encoding
+      -- on_error
+      settings = {
+        Lua = {
+          runtime = {
+            version = "LuaJIT",
+            path = runtime_path,
+          },
+          diagnostics = { globals = { "vim" }},
+          --  workspace = {library = vim.api.nvim_get_runtime_file("", true)},
+          telemetry = {enable = false},
+        }}
+      })
+    vim.lsp.buf_attach_client(0, client)
+    vim.notify('lua language server attached' )
+  end,
+})
+ -- https://neovim.io/doc/user/lsp.html
+-- When the LSP client starts it 
+-- enables diagnostic https://neovim.io/doc/user/diagnostic.html#vim.diagnostic.config()
+-- 'omnifunc' is set 
+-- 'tagfunc' is set 
+-- 'formatexpr' is set to vim.lsp.formatexpr(), so you can format lines via gq if the language server supports it. 
+--
 autocmd("LspAttach", {
   desc = "My LSP Attach",
   group = augroup("lsp_attach"),
-  callback = function(event)
-    local opts = {buffer = event.buf}
+  callback = function(args)
+    local bufnr = args.buf
+    local opts = {buffer = bufnr}
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    -- textDocument/completion
+    if client.server_capabilities.completionProvider then
+      -- TODO redundant below is default
+      vim.bo[bufnr].omnifunc = "v:lua.vim.lsp.omnifunc"
+    end
+    if client.server_capabilities.definitionProvider then
+      -- TODO redundant below is default
+      vim.bo[bufnr].tagfunc = "v:lua.vim.lsp.tagfunc"
+    end
+    if client.server_capabilities.hoverProvider then
+      vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+    end
 
-    --TODO  set on capabilities
-   vim.keymap.set('n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
-    vim.keymap.set('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
-    vim.keymap.set('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
-    vim.keymap.set('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
-    vim.keymap.set('n', 'go', '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
-    vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
-    vim.keymap.set('n', 'gs', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
-    vim.keymap.set('n', '<F2>', '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
-    vim.keymap.set({'n', 'x'}, '<F3>', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
-    vim.keymap.set('n', '<F4>', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
+    if client.server_capabilities.diagnosticProvider then
+      vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+    end
 
-    vim.keymap.set('n', 'gl', '<cmd>lua vim.diagnostic.open_float()<cr>', opts)
-    vim.keymap.set('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>', opts)
-    vim.keymap.set('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<cr>', opts) 
-
-
+      --TODO  set on capabilities
+      vim.keymap.set('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
+      vim.keymap.set('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
+      vim.keymap.set('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
+      vim.keymap.set('n', 'go', '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
+      vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
+      vim.keymap.set('n', 'gs', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
+      vim.keymap.set('n', '<F2>', '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
+      vim.keymap.set({'n', 'x'}, '<F3>', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
+      vim.keymap.set('n', '<F4>', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
+      vim.keymap.set('n', 'gl', '<cmd>lua vim.diagnostic.open_float()<cr>', opts)
+      vim.keymap.set('n', '[d', '<cmd>lua vim.diagnostic.goto_prev()<cr>', opts)
+      vim.keymap.set('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<cr>', opts)
   end,
 })
