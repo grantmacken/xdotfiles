@@ -1,3 +1,12 @@
+local M = {}
+
+local log = function(msg)
+  local fp = io.open( 'my.log', "a")
+  fp:write(string.format("[%-6s%s] %s\n", 'INFO', os.date(), msg))
+  fp:close()
+end
+
+local setup = function()
 local opt = vim.opt
 -- completions
 opt.completeopt = 'menu,menuone,noselect'
@@ -62,3 +71,9 @@ opt.writebackup = false -- Disable making a backup before overwriting a file
 --
 -- Fix markdown indentation settings
 vim.g.markdown_recommended_style = 0
+log( 'vim options set')
+end
+
+M.setup = setup
+
+return M

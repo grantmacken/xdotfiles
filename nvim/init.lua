@@ -1,9 +1,10 @@
-
+--require('disable')
 vim.g.mapleader = ' '
-require("mappings")
-require("options")
-require("autocmds")
-require("my.lsp").handlers()
+require("mappings").setup()
+require("options").setup()
+require("commands").setup()
+require("autocmds").setup()
+-- require("my.lsp").handlers()
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({

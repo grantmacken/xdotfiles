@@ -1,3 +1,6 @@
+local M = {}
+local log = require('my.util').log
+
 local function augroup(name)
   return vim.api.nvim_create_augroup("my_" .. name, { clear = true })
 end
@@ -5,20 +8,23 @@ end
 local autocmd = vim.api.nvim_create_autocmd
 
 -- Check if we need to reload the file when it changed
-autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
-  group = augroup("checktime"),
-  command = "checktime",
-})
+local checkTime = function()
+  autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
+    group = augroup("check_time"),
+    command = "checktime",
+  })
+end
 
--- Highlight on yank
+local highlightYank = function()
 autocmd("TextYankPost", {
   group = augroup("highlight_yank"),
   callback = function()
     vim.highlight.on_yank()
   end,
 })
+end
 
--- close some filetypes with <q>
+local closeWithQ = function()
 autocmd("FileType", {
   group = augroup("close_with_q"),
   pattern = {
@@ -29,7 +35,6 @@ autocmd("FileType", {
     "notify",
     "qf",
     "query", -- :InspectTree
-    "spectre_panel",
     "startuptime",
     "tsplayground",
   },
@@ -38,18 +43,20 @@ autocmd("FileType", {
     vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = event.buf, silent = true })
   end,
 })
+end
 
--- wrap and check for spell in text filetypes
-autocmd("FileType", {
-  group = augroup("wrap_spell"),
-  pattern = { "gitcommit", "markdown" },
-  callback = function()
-    vim.opt_local.wrap = true
-    vim.opt_local.spell = true
-  end,
-})
+local wrapWithSpell = function()
+  autocmd("FileType", {
+    group = augroup("wrap_spell"),
+    pattern = { "gitcommit", "markdown" },
+    callback = function()
+      vim.opt_local.wrap = true
+      vim.opt_local.spell = true
+    end,
+  })
+end
 
--- go to last loc when opening a buffer
+local onOpenGoToLastBuff = function()
 autocmd("BufReadPost", {
   group = augroup("last_loc"),
   callback = function()
@@ -60,14 +67,9 @@ autocmd("BufReadPost", {
     end
   end,
 })
+end
 
-autocmd("FileType", {
-  desc = "Unlist quickfist buffers",
-  group = augroup("unlist_quickfist"),
-  pattern = "qf",
-  callback = function() vim.opt_local.buflisted = false end,
-})
-
+local onLeaveSetSession = function()
 autocmd("VimLeavePre", {
   desc = "On leave save session",
   group = augroup("save_session"),
@@ -80,73 +82,9 @@ autocmd("VimLeavePre", {
     end
   end,
 })
+end
 
-
--- autocmd("FileType", {
---   desc = "golang language server",
---   group = augroup("gopls"),
---   pattern = "go",
---   callback = function()
---     local root_dir = vim.fs.dirname(
---     vim.fs.find({ 'go.mod', 'go.work', '.git' }, { upward = true })[1]
---     )
---     local client = vim.lsp.start({
---             name = 'gopls',
---             cmd = { 'gopls' },
---             root_dir = root_dir,
---         })
---     vim.lsp.buf_attach_client(0, client)
---     vim.notify('gopls attached' )
---   end,
--- })
-
-autocmd("FileType", {
-  desc = "lua language server",
-  group = augroup("lua_ls"),
-  pattern = "lua",
-  callback = function()
-    local runtime_path = vim.split(package.path, ";")
-    table.insert(runtime_path, "lua/?.lua")
-    table.insert(runtime_path, "lua/?/init.lua")
-    local root_dir = vim.fs.dirname(vim.fs.find({ 'Makefile', '.git' }, { upward = true })[1])
-    local client = vim.lsp.start({
-      name = 'lua_ls',
-      cmd = { 'lua-language-server' },
-      root_dir = root_dir,
-      -- workspace_folders = nil,
-      -- before_init(initialize_params, config) 
-      -- on_init(client, initialize_result)
-      on_init = function(_, _)
-        vim.notify( 'Init lua-language-server' )
-      end,
-      -- on_exit(code, signal, client_id)
-      -- on_attach (client, bufnr )
-      -- handlers = {}
-      -- get_language_id
-      -- offset_encoding
-      -- on_error
-      settings = {
-        Lua = {
-          runtime = {
-            version = "LuaJIT",
-            path = runtime_path,
-          },
-          diagnostics = { globals = { "vim" }},
-          --  workspace = {library = vim.api.nvim_get_runtime_file("", true)},
-          telemetry = {enable = false},
-        }}
-      })
-    vim.lsp.buf_attach_client(0, client)
-    vim.notify('lua language server attached' )
-  end,
-})
- -- https://neovim.io/doc/user/lsp.html
--- When the LSP client starts it 
--- enables diagnostic https://neovim.io/doc/user/diagnostic.html#vim.diagnostic.config()
--- 'omnifunc' is set 
--- 'tagfunc' is set 
--- 'formatexpr' is set to vim.lsp.formatexpr(), so you can format lines via gq if the language server supports it. 
---
+local onLangServerAttach = function()
 autocmd("LspAttach", {
   desc = "My LSP Attach",
   group = augroup("lsp_attach"),
@@ -154,6 +92,7 @@ autocmd("LspAttach", {
     local bufnr = args.buf
     local opts = {buffer = bufnr}
     local client = vim.lsp.get_client_by_id(args.data.client_id)
+    log(' on lang server attached')
     -- textDocument/completion
     if client.server_capabilities.completionProvider then
       -- TODO redundant below is default
@@ -186,3 +125,122 @@ autocmd("LspAttach", {
       vim.keymap.set('n', ']d', '<cmd>lua vim.diagnostic.goto_next()<cr>', opts)
   end,
 })
+end
+
+M.setup = function()
+  checkTime()
+  highlightYank()
+  closeWithQ()
+  wrapWithSpell()
+  onOpenGoToLastBuff()
+  onLeaveSetSession()
+  onLangServerAttach()
+  log( 'autocommands setup completed' )
+end
+
+-- -- go to last loc when opening a buffer
+-- autocmd("FileType", {
+--   desc = "Unlist quickfist buffers",
+--   group = augroup("unlist_quickfist"),
+--   pattern = "qf",
+--   callback = function() vim.opt_local.buflisted = false end,
+-- })
+--
+
+--
+-- autocmd("FileType", {
+--   desc = "ocaml-lsp-server",
+--   group = augroup("ocamllsp"),
+--   pattern = {"ocaml"},
+--   callback = function()
+--     local language_id_of = {
+--       menhir = 'ocaml.menhir',
+--       ocaml = 'ocaml',
+--       ocamlinterface = 'ocaml.interface',
+--       ocamllex = 'ocaml.ocamllex',
+--       reason = 'reason',
+--       dune = 'dune',
+--     }
+--     local get_language_id = function(_, ftype)
+--       return language_id_of[ftype]
+--     end
+--     local root_dir = vim.fs.dirname(vim.fs.find({'*.opam', 'esy.json', 'package.json', '.git', 'dune-project', 'dune-workspace'}, { upward = true })[1])
+--     local client = vim.lsp.start({
+--             name = 'ocamllsp',
+--             cmd = { 'ocamllsp' },
+--             filetypes = { 'ocaml', 'ocaml.menhir', 'ocaml.interface', 'ocaml.ocamllex', 'reason', 'dune' },
+--             root_dir = root_dir,
+--             get_language_id = get_language_id
+--         })
+--     vim.lsp.buf_attach_client(0, client)
+--     vim.notify('ocamllsp attached' )
+--   end,
+-- })
+--
+-- autocmd("FileType", {
+--   desc = "golang language server",
+--   group = augroup("gopls"),
+--   pattern = "go",
+--   callback = function()
+--     local root_dir = vim.fs.dirname(
+--     vim.fs.find({ 'go.mod', 'go.work', '.git' }, { upward = true })[1]
+--     )
+--     local client = vim.lsp.start({
+--             name = 'gopls',
+--             cmd = { 'gopls' },
+--             root_dir = root_dir,
+--         })
+--     vim.lsp.buf_attach_client(0, client)
+--     vim.notify('gopls attached' )
+--   end,
+-- })
+--
+-- autocmd("FileType", {
+--   desc = "lua language server",
+--   group = augroup("lua_ls"),
+--   pattern = "lua",
+--   callback = function()
+--     local runtime_path = vim.split(package.path, ";")
+--     table.insert(runtime_path, "lua/?.lua")
+--     table.insert(runtime_path, "lua/?/init.lua")
+--     local root_dir = vim.fs.dirname(vim.fs.find({ 'Makefile', '.git', 'init.lua'  }, { upward = true })[1])
+--     local client = vim.lsp.start({
+--       name = 'lua_ls',
+--       cmd = { 'lua-language-server' },
+--       root_dir = root_dir,
+--       -- workspace_folders = nil,
+--       -- before_init(initialize_params, config) 
+--       -- on_init(client, initialize_result)
+--       on_init = function(_, _)
+--         vim.notify( 'Init lua-language-server' )
+--       end,
+--       -- on_exit(code, signal, client_id)
+--       -- on_attach (client, bufnr )
+--       -- handlers = {}
+--       -- get_language_id
+--       -- offset_encoding
+--       -- on_error
+--       settings = {
+--         Lua = {
+--           runtime = {
+--             version = "LuaJIT",
+--             path = runtime_path,
+--           },
+--           diagnostics = { globals = { "vim" }},
+--           --  workspace = {library = vim.api.nvim_get_runtime_file("", true)},
+--           telemetry = {enable = false},
+--         }}
+--       })
+--     vim.lsp.buf_attach_client(0, client)
+--     vim.notify('lua language server attached' )
+--   end,
+-- })
+ -- https://neovim.io/doc/user/lsp.html
+-- When the LSP client starts it 
+-- enables diagnostic https://neovim.io/doc/user/diagnostic.html#vim.diagnostic.config()
+-- 'omnifunc' is set 
+-- 'tagfunc' is set 
+-- 'formatexpr' is set to vim.lsp.formatexpr(), so you can format lines via gq if the language server supports it. 
+--
+
+return M

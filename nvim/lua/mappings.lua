@@ -1,3 +1,4 @@
+local M = {}
 -- Modes
 --   normal_mode = "n",
 --   insert_mode = "i",
@@ -5,8 +6,9 @@
 --   visual_block_mode = "x",
 --   term_mode = "t",
 --   command_mode = "c",
---
---
+
+local log = require('my.util').log
+M.setup = function()
 vim.cmd [[ command! W  execute ':w' ]] -- map :W to :w (helps which-key issue)
 local km = vim.keymap.set
 km('n', ' ', '<Nop>', { silent = true, remap = false })
@@ -30,11 +32,12 @@ km('v', '<A-j>', ":m '>+1<cr>gv=gv", { desc = 'Move down' })
 km('v', '<A-k>', ":m '<-2<cr>gv=gv", { desc = 'Move up' })
 
 -- Navigate tabs
-km('n', ']t', function()
-  vim.cmd.tabnext()
-end, { desc = 'Next tab' })
+km('n', ']t', function()vim.cmd.tabnext() end, { desc = 'Next tab' })
 km('n', '[t', function()
   vim.cmd.tabprevious()
 end, { desc = 'Previous tab' })
 
-require 'my.util'
+log('vim mappings setup')
+end
+
+return M

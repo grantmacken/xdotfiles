@@ -1,3 +1,39 @@
+
+    -- playground = {
+    --   enable = true,
+    --   disable = {},
+    --   updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
+    --   persist_queries = false, -- Whether the query persists across vim sessions
+    --   keybindings = {
+    --     toggle_query_editor = 'o',
+    --     toggle_hl_groups = 'i',
+    --     toggle_injected_languages = 't',
+    --     toggle_anonymous_nodes = 'a',
+    --     toggle_language_display = 'I',
+    --     focus_language = 'f',
+    --     unfocus_language = 'F',
+    --     update = 'R',
+    --     goto_node = '<cr>',
+    --     show_help = '?',
+    --   },
+    -- },
+    --
+    --
+  -- init = function()
+  --   require('nvim-treesitter.install').prefer_git = true
+  --   local parser_config = require('nvim-treesitter.parsers').get_parser_configs()
+  --   parser_config.xquery = {
+  --     install_info = {
+  --       url = '~/projects/grantmacken/tree-sitter-xquery',
+  --       files = { 'src/parser.c' },
+  --       branch = 'main',
+  --     },
+  --     filetype = 'xquery',
+  --   }
+  -- end,
+  --
+    --indent = { enable = true },
+    --context_commentstring = { enable = true, enable_autocmd = false },  --
 return {
   'nvim-treesitter/nvim-treesitter',
   version = false,
@@ -12,29 +48,20 @@ return {
     'andymass/vim-matchup',
   },
   event = { 'BufReadPost', 'BufNewFile' },
-  init = function()
-    require('nvim-treesitter.install').prefer_git = true
-    local parser_config = require('nvim-treesitter.parsers').get_parser_configs()
-    parser_config.xquery = {
-      install_info = {
-        url = '~/projects/grantmacken/tree-sitter-xquery',
-        files = { 'src/parser.c' },
-        branch = 'main',
-      },
-      filetype = 'xquery',
-    }
-  end,
   opts = {
     highlight = {
       enable = true,
-      custom_captures = {
-        ['declaration'] = 'Identifier',
-      },
+      disable = function(lang, buf)
+        local max_filesize = 100 * 1024 -- 100 KB
+        local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+        if ok and stats and stats.size > max_filesize then
+            return true
+        end
+    end,
       additional_vim_regex_highlighting = false,
     },
-    --indent = { enable = true },
-    --context_commentstring = { enable = true, enable_autocmd = false },
     ensure_installed = {
+      'comment',
       'bash',
       'css',
       'html',
@@ -43,54 +70,37 @@ return {
       'lua',
       'query',
       'regex',
+      'make',
+      "ocaml",
+      "ocaml_interface",
+      "toml",
       'go',
       "go",
       "gomod",
       "gowork",
       "gosum",
+      "markdown",
+      "markdown_inline"
     },
-    playground = {
-      enable = true,
-      disable = {},
-      updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
-      persist_queries = false, -- Whether the query persists across vim sessions
-      keybindings = {
-        toggle_query_editor = 'o',
-        toggle_hl_groups = 'i',
-        toggle_injected_languages = 't',
-        toggle_anonymous_nodes = 'a',
-        toggle_language_display = 'I',
-        focus_language = 'f',
-        unfocus_language = 'F',
-        update = 'R',
-        goto_node = '<cr>',
-        show_help = '?',
-      },
+    sync_install = false,
+    auto_install = false,
+    autotag = { enable = false },
+    playground = { enable = true},
     },
-    query_linter = {
-      enable = true,
-      use_virtual_text = true,
-      lint_events = { 'BufWrite', 'CursorHold' },
-    },
+    -- query_linter = {
+    --   enable = true,
+    --   use_virtual_text = true,
+    --   lint_events = { 'BufWrite', 'CursorHold' },
+    -- },
     rainbow = {
       enable = true,
     },
     matchup = {
       enable = true, -- mandatory
     },
-  },
   config = function(_, opts)
-    if type(opts.ensure_installed) == 'table' then
-      ---@type table<string, boolean>
-      local added = {}
-      opts.ensure_installed = vim.tbl_filter(function(lang)
-        if added[lang] then
-          return false
-        end
-        added[lang] = true
-        return true
-      end, opts.ensure_installed)
-    end
-    require('nvim-treesitter.configs').setup(opts)
-  end,
-}
+    require'nvim-treesitter.configs'.setup(opts)
+  end
+  }
+
+

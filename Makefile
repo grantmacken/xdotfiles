@@ -64,6 +64,11 @@ ocaml:
 	#opam install dream
 
 
+pip:
+	# sudo dnf install python3-pip
+	python -m pip install --user wheel
+	python -m pip install --user pynvim
+	#python -m pip install --update --user cowsay
 
 
 
