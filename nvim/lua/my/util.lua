@@ -16,7 +16,7 @@ local log = function(msg)
   fp:close()
 end
 
-local clear_log = function(msg)
+local clear_log = function()
   local fp = io.open( 'my.log', "w")
   fp:write('')
   fp:close()
@@ -26,7 +26,7 @@ end
 
 M.get_session_name = get_session_name
 M.log = log
-M.clear = log_clear
+M.clear_log = clear_log
 
 
 return M
