@@ -1,11 +1,11 @@
 local M = {}
 local log = require('my.util').log
 
+local autocmd = vim.api.nvim_create_autocmd
 local function augroup(name)
   return vim.api.nvim_create_augroup("my_" .. name, { clear = true })
 end
 
-local autocmd = vim.api.nvim_create_autocmd
 
 -- Check if we need to reload the file when it changed
 local checkTime = function()
@@ -85,15 +85,33 @@ local onLeave = function()
     desc = "On leave save session",
     group = augroup("save_session"),
     callback = function()
-      local resession_ok, resession = pcall(require, 'resession ')
-      if resession_ok then
-        local save = resession.save
-        save('Last Session')
-        save(vim.fn.getcwd(), { dir = "dirsession", notify = false })
+      local get_session_name = require('my.util').get_session_name
+      local ok, resession = pcall(require, 'resession ')
+      if ok then
+        require('resession').load(require('my.util').get_session_name())
       end
     end,
   })
 end
+
+local onEnter = function()
+  autocmd("VimEnter", {
+    desc = "On enter load session",
+    group = augroup("load_session"),
+    callback = function()
+      local get_session_name = require('my.util').get_session_name
+      log('Session: ' .. get_session_name())
+      local ok, resession = pcall(require, 'resession ')
+      if ok then
+        log('Session: ' .. get_session_name())
+        if vim.fn.argc(-1) == 0 then
+          require('resession').load(require('my.util').get_session_name())
+        end
+      end
+    end
+  })
+end
+
 
 local onLangServerAttach = function()
   autocmd("LspAttach", {
@@ -189,13 +207,50 @@ local onDiagnosticChange = function()
   autocmd("DiagnosticChanged", {
     desc = "My Diagnostic Changed",
     group = augroup("diagnostic_changed"),
-    callback = function(args)
+    callback = function(_)
       vim.diagnostic.setloclist({ open = false })
     end,
   })
 end
 
+local onTermOpen = function()
+  autocmd("TermOpen", {
+    desc = "On Term Open",
+    group = augroup("term_opened"),
+    callback = function(_)
+      vim.opt_local.foldcolumn = "0"
+      vim.opt_local.signcolumn = "no"
+      vim.opt_local.statuscolumn = nil
+    end,
+  })
+end
 
+-- https://github.com/golang/tools/blob/master/gopls/doc/vim.md
+local withGolang = function()
+  autocmd("BufWritePre", {
+    group = augroup("check_time"),
+    pattern = "*.go",
+    callback = function()
+      local params = vim.lsp.util.make_range_params()
+      params.context = { only = { "source.organizeImports" } }
+      -- buf_request_sync defaults to a 1000ms timeout. Depending on your
+      -- machine and codebase, you may want longer. Add an additional
+      -- argument after params if you find that you have to write the file
+      -- twice for changes to be saved.
+      -- E.g., vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 3000)
+      local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params)
+      for cid, res in pairs(result or {}) do
+        for _, r in pairs(res.result or {}) do
+          if r.edit then
+            local enc = (vim.lsp.get_client_by_id(cid) or {}).offset_encoding or "utf-16"
+            vim.lsp.util.apply_workspace_edit(r.edit, enc)
+          end
+        end
+      end
+      vim.lsp.buf.format({ async = false })
+    end
+  })
+end
 
 M.setup = function()
   checkTime()
@@ -204,30 +259,15 @@ M.setup = function()
   wrapWithSpell()
   unlistQuickfistBuffers()
   onOpenGoToLastBuff()
-  onLeave()
   onLangServerAttach()
   onDiagnosticChange()
+  onTermOpen()
+  onLeave()
+  onEnter()
+  withGolang()
   log('autocommands setup completed')
 end
 
---
--- autocmd("FileType", {
---   desc = "golang language server",
---   group = augroup("gopls"),
---   pattern = "go",
---   callback = function()
---     local root_dir = vim.fs.dirname(
---     vim.fs.find({ 'go.mod', 'go.work', '.git' }, { upward = true })[1]
---     )
---     local client = vim.lsp.start({
---             name = 'gopls',
---             cmd = { 'gopls' },
---             root_dir = root_dir,
---         })
---     vim.lsp.buf_attach_client(0, client)
---     vim.notify('gopls attached' )
---   end,
--- })
 --
 -- https://neovim.io/doc/user/lsp.html
 -- When the LSP client starts it

@@ -1,11 +1,9 @@
 return
 {
     "lukas-reineke/indent-blankline.nvim",
-    main = "ibl", 
+    main = "ibl",
     event = { "BufReadPost", "BufNewFile" },
-    opts = {
-      filetype_exclude = { "help", "alpha", "dashboard", "neo-tree", "Trouble", "lazy", "mason" },
-    },
+    opts = {},
   config = function(_, opts)
   require('ibl').setup(opts)
   end

@@ -11,6 +11,7 @@ MAKEFLAGS += -j$(shell nproc)
 .PHONY: config
 config:
 	# sudo dnf install stow -y
+	#sudo dnf config-manager --add-repo http://ftp.byfly.by/pub/fedoraproject.org/linux/releases/23/Everything/x86_64/os/
 	echo 'TASK: use stow to create symlinks in XDG config dir'
 	mkdir -p -v $(HOME)/.config/{npm,nvim,git,kitty}
 	#stow -v  --target=$(HOME)/.config/nvim nvim
@@ -46,9 +47,20 @@ fonts:
 	#fc-cache -f -v
 	fc-list
 
+FEDORA_VERSION := $(shell rpm -E %fedora)
+
 dnf:
 	#sudo dnf copr remove phracek/PyCharm	
 	#sudo dnf install wl-clipboard -y
+	echo '$(FEDORA_VERSION)'
+	# sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(FEDORA_VERSION).noarch.rpm
+	# sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(FEDORA_VERSION).noarch.rpm
+	# multimedia plugins
+	# sudo dnf install gstreamer1-plugins-{bad-\*,good-\*,base} gstreamer1-plugin-openh264 gstreamer1-libav --exclude=gstreamer1-plugins-bad-free-devel
+	# sudo dnf install lame\* --exclude=lame-devel
+	# sudo dnf group upgrade --with-optional Multimedia
+	# sudo dnf install youtube-dl ffmpeg
+	sudo dnf install nodejs -y
 
 .PHONY: mnt
 mnt:
@@ -66,8 +78,8 @@ ocaml:
 
 pip:
 	# sudo dnf install python3-pip
-	python -m pip install --user wheel
-	python -m pip install --user pynvim
+	#python -m pip install --user wheel
+	#python -m pip install --user pynvim
 	#python -m pip install --update --user cowsay
 
 
